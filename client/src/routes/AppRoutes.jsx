@@ -18,7 +18,7 @@ export default function AppRoutes() {
         {/* Default redirect to register */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         {/* Public Routes (no auth needed) */}
-        <Route element={<AuthLayout/>}>
+        <Route element={<AuthLayout />}>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
         </Route>
