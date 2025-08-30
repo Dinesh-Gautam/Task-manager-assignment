@@ -1,41 +1,48 @@
-const { registerSchema, loginSchema } = require("../middleware/schemaValidator");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../middleware/schemaValidator");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { hashPassword, comparePassword } = require("../utils/hash");
 
 const login = async (req, res) => {
-    const {error , value } = loginSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
+  const { error, value } = loginSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
 
-    const { email, password } = value;
-    const userExists = await User.findOne({ email });
-    if (!userExists) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
+  const { email, password } = value;
+  const userExists = await User.findOne({ email });
+  if (!userExists) {
+    return res.status(400).json({ error: "Invalid email or password" });
+  }
 
-    const isMatch = await comparePassword(password, userExists.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
+  const isMatch = await comparePassword(password, userExists.password);
+  if (!isMatch) {
+    return res.status(400).json({ error: "Invalid email or password" });
+  }
 
-    const userData = { id: userExists._id, name: userExists.name , email: userExists.email, role: userExists.role };
-    const token = jwt.sign(userData, process.env.SECRET, { expiresIn: "3h" });
+  const userData = {
+    id: userExists._id,
+    name: userExists.name,
+    email: userExists.email,
+    role: userExists.role,
+  };
+  const token = jwt.sign(userData, process.env.SECRET, { expiresIn: "3h" });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 1000
-    });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 60 * 60 * 1000,
+  });
 
-    return res.status(200).json({
-      message: "Login successful",
-      user: userData
-    });
-}
-
+  return res.status(200).json({
+    message: "Login successful",
+    user: userData,
+  });
+};
 
 const register = async (req, res) => {
   try {
@@ -53,17 +60,18 @@ const register = async (req, res) => {
     const hashedPassword = await hashPassword(password);
     const user = new User({ name, email, password: hashedPassword });
     await user.save();
-    const userData = { id: user._id, name: user.name , email: user.email , role: user.role };
-    const token = jwt.sign(
-      userData,
-      process.env.SECRET,
-      { expiresIn: "3h" }
-    );
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+    const token = jwt.sign(userData, process.env.SECRET, { expiresIn: "3h" });
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000,
     });
 
@@ -77,15 +85,16 @@ const register = async (req, res) => {
   }
 };
 
-
 const logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "none",
   });
 
-  return res.status(200).json({success : true, message: "Logged out successfully" });
+  return res
+    .status(200)
+    .json({ success: true, message: "Logged out successfully" });
 };
 
 const verify = (req, res) => {
