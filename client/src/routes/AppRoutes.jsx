@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import AuthLayout from "../layout/authLayout";
+import AuthLayout from "../layout/AuthLayout";
 import Register from "../pages/auth/RegisterPage";
 import Login from "../pages/auth/LoginPage";
 import TaskList from "../pages/tasks/TaskList";
