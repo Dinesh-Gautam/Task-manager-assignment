@@ -10,15 +10,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.APP_URL || "http://localhost:5173",
     credentials: true,
   })
 );
 connectDB();
+
+app.get("/", (req, res) => {
+  res.json({ message: "Backend API is running" });
+});
+
 app.use("/api/v1", mainRouter);
+
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 app.use(errorHandler);
 module.exports = app;
